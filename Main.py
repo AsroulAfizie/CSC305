@@ -6,5 +6,5 @@ for i in fruits:
     print(i)
 
 for x in range(3):
-    print("BFAB ")
+    print("Fuck")
     
