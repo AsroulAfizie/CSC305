@@ -19,3 +19,6 @@ print("Result is -> %d" %myResult)
 name = "John"
 text = "My Name is " + name + " and I am %d."% age
 print(text)
+
+for x in range(6):
+    print(x +1)
