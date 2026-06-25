@@ -10,5 +10,7 @@ public class SeafoodSupplierSystem{
         int num = scan.nextInt();
 
         System.out.println("Your Number " + num);
+
+        scan.close();
     }
 }
