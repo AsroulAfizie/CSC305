@@ -36,7 +36,10 @@ public class Main{
             FileWriter fw = new FileWriter("output.txt");
             PrintWriter pw = new PrintWriter(fw);
 
-            pw.println(customer.get(1));
+            System.out.println("\nList Of Customer");
+            for (int i = 0; i < customer.size(); i++) {
+            System.out.println(customer.get(i));
+            }
 
             pw.close();
         }catch(IOException e) {
