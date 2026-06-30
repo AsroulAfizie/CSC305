@@ -42,7 +42,8 @@ public abstract class Delivery {
     public String getDeliveryType() { return deliveryType; }
     public void setDeliveryType(String deliveryType) { this.deliveryType = deliveryType; }
 
-
+    //OKAY BROS
+    
     public abstract double calcTotalPrice();
 
     @Override
