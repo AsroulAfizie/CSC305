@@ -1,8 +1,8 @@
 import java.util.ArrayList;
 
 public class SeafoodOrder extends Delivery {
-    ArrayList<String> seafoodName = new ArrayList<>();
-    ArrayList<Integer> seafoodQuantity = new ArrayList<>();
+    public ArrayList<String> seafoodName = new ArrayList<>();
+    public ArrayList<Integer> seafoodQuantity = new ArrayList<>();
     
     public SeafoodOrder(){
         super();
@@ -16,6 +16,7 @@ public class SeafoodOrder extends Delivery {
         seafoodQuantity= new ArrayList<>(qtty);
     }
 
+    @Override
     public double calcTotalPrice(){
         double totalPrice = 0;
         for(int i = 0; i < seafoodName.size(); i++){
@@ -43,6 +44,7 @@ public class SeafoodOrder extends Delivery {
         return totalPrice;
     }
 
+    @Override
     public String toString(){
         StringBuilder data = new StringBuilder();
 
