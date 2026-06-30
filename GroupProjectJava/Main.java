@@ -5,7 +5,8 @@ public class Main{
     public static void main(String [] args){
         try{
             ArrayList<SeafoodOrder> customer = new ArrayList<>();
-            FileReader fr = new FileReader("GroupProjectJava/input.txt");
+            System.out.println("Working dir: " + System.getProperty("user.dir"));
+            FileReader fr = new FileReader("input.txt");
             BufferedReader br = new BufferedReader(fr);
 
             String data = null;
