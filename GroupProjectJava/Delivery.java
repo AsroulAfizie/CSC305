@@ -3,7 +3,6 @@ public abstract class Delivery {
     private String phoneNum;
     private String address;
     private String deliveryType;
-    private final double DELIVERYFEE = 5.00;
 
     public Delivery(){
        name = null;
