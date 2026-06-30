@@ -1,16 +1,50 @@
+import java.io.*;
 import java.util.*;
 
 public class Main{
     public static void main(String [] args){
-        System.out.println("Hello World");
+        try{
+            ArrayList<SeafoodOrder> customer = new ArrayList<>();
+            FileReader fr = new FileReader("input.txt");
+            BufferedReader br = new BufferedReader(fr);
 
-        System.out.print("Enter A nigga name : ");
-        Scanner scan = new Scanner(System.in);
+            String data = null;
 
-        int num = scan.nextInt();
+            while((data = br.readLine()) != null){
+                ArrayList <String> seafoodNameArr = new ArrayList<>();
+                ArrayList <Integer> quantityArr = new ArrayList<>();
 
-        System.out.println("Your Number " + num);
+                StringTokenizer st = new StringTokenizer(data,";");
+                String name = st.nextToken();
+                String phoneNum = st.nextToken();
+                String address = st.nextToken();
+                String deliveryType = st.nextToken();
 
-        scan.close();
+                while(st.hasMoreTokens()){
+                    String seafoodName = st.nextToken();
+                    int seafoodQuantity = Integer.parseInt(st.nextToken());
+
+                    seafoodNameArr.add(seafoodName);
+                    quantityArr.add(seafoodQuantity);
+                }
+
+                SeafoodOrder cust = new SeafoodOrder(name, phoneNum, address, deliveryType, seafoodNameArr, quantityArr);
+                customer.add(cust);
+            }
+            br.close();
+
+            FileWriter fw = new FileWriter("output.txt");
+            PrintWriter pw = new PrintWriter(fw);
+
+            pw.println(customer.get(1));
+
+            pw.close();
+        }catch(IOException e) {
+            System.out.println("Error reading orders input file.");
+        }catch(NoSuchElementException e) {
+            System.out.println("Error: File format is incorrect or missing data fields.");
+        } catch(NumberFormatException e) {
+            System.out.println("Error: Could not parse quantity string into an integer.");
+        }
     }
 }
