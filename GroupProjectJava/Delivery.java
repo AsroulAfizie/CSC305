@@ -45,6 +45,7 @@ public abstract class Delivery {
 
     public abstract double calcTotalPrice();
 
+    @Override
     public String toString(){
         return "Name : " + name + "\nPhone Number : " + phoneNum + "\nAddress : " + address + "\nDeliveryType : " + deliveryType + "\n";
     }
