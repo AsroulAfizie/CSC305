@@ -246,29 +246,35 @@ public class Main{
 
                 
 
-                } else if (choice == 3) {
-                    // 3. IMPLEMENT UPDATING SEAFOOD ORDER WITH VALIDATION
+                    } else if (choice == 3) {
+                    // 3. IMPLEMENT SEARCH & UPDATE SEAFOOD ORDER
                     if (customer.isEmpty()) {
                         System.out.println("No entries inside memory tracking records to modify.");
                         continue;
                     }
 
+                    // --- SEARCH PHASE ---
+                    System.out.print("Enter Customer Name to search: ");
+                    String searchName = inputScanner.nextLine().trim();
                     int updateIdx = -1;
-                    while (true) {
-                        System.out.print("Enter index to update (0 to " + (customer.size() - 1) + "): ");
-                        if (inputScanner.hasNextInt()) {
-                            updateIdx = inputScanner.nextInt();
-                            inputScanner.nextLine(); // Clear buffer
-                            if (updateIdx >= 0 && updateIdx < customer.size()) break;
-                            System.out.println("[Error] Index value is out of system boundaries.");
-                        } else {
-                            System.out.println("[Error] Please enter a valid numeric integer index.");
-                            inputScanner.nextLine();
+
+                    // Loop through the ArrayList to find the matching name
+                    for (int i = 0; i < customer.size(); i++) {
+                        if (customer.get(i).getName().equalsIgnoreCase(searchName)) {
+                            updateIdx = i; // Save the index where it was found
+                            break;
                         }
                     }
 
+                    // If the name does not exist in the collection
+                    if (updateIdx == -1) {
+                        System.out.println("[Search Error] No active order found under the name '" + searchName + "'.");
+                        continue;
+                    }
+
+                    // --- UPDATE PHASE ---
                     SeafoodOrder target = customer.get(updateIdx);
-                    System.out.println("Modifying order parameters for customer: " + target.getName());
+                    System.out.println("\n[Match Found] Modifying order parameters for customer: " + target.getName());
 
                     System.out.print("Enter New Address (Or press enter to keep '" + target.getAddress() + "'): ");
                     String nextAddress = inputScanner.nextLine().trim();
@@ -278,7 +284,10 @@ public class Main{
                         System.out.print("Enter New Delivery Type (Or press enter to keep '" + target.getDeliveryType() + "'): ");
                         String nextDelType = inputScanner.nextLine().trim();
                         if (nextDelType.isEmpty()) break;
+                        
                         if (nextDelType.equalsIgnoreCase("Rush") || nextDelType.equalsIgnoreCase("Regular")) {
+                            // Capitalize first letter neatly
+                            nextDelType = nextDelType.substring(0, 1).toUpperCase() + nextDelType.substring(1).toLowerCase();
                             target.setDeliveryType(nextDelType);
                             break;
                         }
@@ -344,9 +353,9 @@ public class Main{
                         regularCount++;
                     }
 
-                    for (int j = 0; j < c.seafoodName.size(); j++) {
-                        String name = c.seafoodName.get(j);
-                        int qty = c.seafoodQuantity.get(j);
+                    for (int j = 0; j < c.getSeafoodName().size(); j++) {
+                        String name = c.getSeafoodName().get(j);
+                        int qty = c.getSeafoodQuantity().get(j);
 
                         boolean found = false;
                         for (int k = 0; k < seafoodTypes.size(); k++) {
@@ -386,23 +395,25 @@ public class Main{
 
                 pw.close();
 
-                // Keep input.txt as the raw data backup (unchanged from before)
-                PrintWriter dataFileWriter = new PrintWriter(new FileWriter("input.txt"));
-                for (int i = 0; i < customer.size(); i++) {
-                    SeafoodOrder current = customer.get(i);
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(current.getName()).append(";")
-                    .append(current.getPhoneNum()).append(";")
-                    .append(current.getAddress()).append(";")
-                    .append(current.getDeliveryType());
+                // Synchronize and dump memory collection updates back into input.txt structure file
+                    PrintWriter dataFileWriter = new PrintWriter(new FileWriter("input.txt"));
+                    for (int i = 0; i < customer.size(); i++) {
+                        SeafoodOrder current = customer.get(i);
+                        StringBuilder sb = new StringBuilder();
+                        sb.append(current.getName()).append(";")
+                        .append(current.getPhoneNum()).append(";")
+                        .append(current.getAddress()).append(";")
+                        .append(current.getDeliveryType());
 
-                    for (int j = 0; j < current.seafoodName.size(); j++) {
-                        sb.append(";").append(current.seafoodName.get(j))
-                        .append(";").append(current.seafoodQuantity.get(j));
+                        // FIX: Used getter methods here instead of direct public access
+                        for (int j = 0; j < current.getSeafoodName().size(); j++) {
+                            sb.append(";").append(current.getSeafoodName().get(j))
+                            .append(";").append(current.getSeafoodQuantity().get(j));
+                        }
+                        dataFileWriter.println(sb.toString());
+                        pw.println(current); // Keeping original output file copy mechanism
                     }
-                    dataFileWriter.println(sb.toString());
-                }
-                dataFileWriter.close();
+                    dataFileWriter.close();
 
             pw.close();
         }catch(IOException e) {
