@@ -244,56 +244,284 @@ public class Main{
                             System.out.println("[Success] Verified order successfully appended to system memory list.");
 
 
-                
+                            } else if (choice == 3) {
+                                // 3. IMPLEMENT SEARCH & UPDATE SEAFOOD ORDER (ALL ATTRIBUTES)
+                                if (customer.isEmpty()) {
+                                    System.out.println("No entries inside memory tracking records to modify.");
+                                    continue;
+                                }
 
-                    } else if (choice == 3) {
-                    // 3. IMPLEMENT SEARCH & UPDATE SEAFOOD ORDER
-                    if (customer.isEmpty()) {
-                        System.out.println("No entries inside memory tracking records to modify.");
-                        continue;
-                    }
+                                // --- SEARCH PHASE ---
+                                System.out.print("Enter Customer Name to search: ");
+                                String searchName = inputScanner.nextLine().trim();
+                                int updateIdx = -1;
 
-                    // --- SEARCH PHASE ---
-                    System.out.print("Enter Customer Name to search: ");
-                    String searchName = inputScanner.nextLine().trim();
-                    int updateIdx = -1;
+                                for (int i = 0; i < customer.size(); i++) {
+                                    if (customer.get(i).getName().equalsIgnoreCase(searchName)) {
+                                        updateIdx = i;
+                                        break;
+                                    }
+                                }
 
-                    // Loop through the ArrayList to find the matching name
-                    for (int i = 0; i < customer.size(); i++) {
-                        if (customer.get(i).getName().equalsIgnoreCase(searchName)) {
-                            updateIdx = i; // Save the index where it was found
-                            break;
-                        }
-                    }
+                                if (updateIdx == -1) {
+                                    System.out.println("[Search Error] No active order found under the name '" + searchName + "'.");
+                                    continue;
+                                }
 
-                    // If the name does not exist in the collection
-                    if (updateIdx == -1) {
-                        System.out.println("[Search Error] No active order found under the name '" + searchName + "'.");
-                        continue;
-                    }
+                                SeafoodOrder target = customer.get(updateIdx);
+                                System.out.println("\n[Match Found] Current order details:");
+                                System.out.println(target);
 
-                    // --- UPDATE PHASE ---
-                    SeafoodOrder target = customer.get(updateIdx);
-                    System.out.println("\n[Match Found] Modifying order parameters for customer: " + target.getName());
+                                // --- 1. UPDATE NAME (Optional, letters and spaces only) ---
+                                while (true) {
+                                    System.out.print("Enter New Name (Or press enter to keep '" + target.getName() + "'): ");
+                                    String nextName = inputScanner.nextLine().trim();
 
-                    System.out.print("Enter New Address (Or press enter to keep '" + target.getAddress() + "'): ");
-                    String nextAddress = inputScanner.nextLine().trim();
-                    if (!nextAddress.isEmpty()) target.setAddress(nextAddress);
+                                    if (nextName.isEmpty()) {
+                                        break; // Keep existing name
+                                    }
 
-                    while (true) {
-                        System.out.print("Enter New Delivery Type (Or press enter to keep '" + target.getDeliveryType() + "'): ");
-                        String nextDelType = inputScanner.nextLine().trim();
-                        if (nextDelType.isEmpty()) break;
-                        
-                        if (nextDelType.equalsIgnoreCase("Rush") || nextDelType.equalsIgnoreCase("Regular")) {
-                            // Capitalize first letter neatly
-                            nextDelType = nextDelType.substring(0, 1).toUpperCase() + nextDelType.substring(1).toLowerCase();
-                            target.setDeliveryType(nextDelType);
-                            break;
-                        }
-                        System.out.println("[Error] Selection must strictly match either 'Rush' or 'Regular'.");
-                    }
-                    System.out.println("[Success] System parameters modified successfully.");
+                                    boolean validName = true;
+                                    for (int i = 0; i < nextName.length(); i++) {
+                                        char c = nextName.charAt(i);
+                                        if (!Character.isLetter(c) && c != ' ') {
+                                            validName = false;
+                                            break;
+                                        }
+                                    }
+
+                                    if (!validName) {
+                                        System.out.println("[Input Error] Name can only contain letters and spaces (no numbers or symbols).");
+                                        continue;
+                                    }
+
+                                    target.setName(nextName);
+                                    break;
+                                }
+
+                                // --- 2. UPDATE PHONE NUMBER (Optional, Malaysian format) ---
+                                while (true) {
+                                    System.out.print("Enter New Phone Number (Or press enter to keep '" + target.getPhoneNum() + "'): ");
+                                    String nextPhone = inputScanner.nextLine().trim();
+
+                                    if (nextPhone.isEmpty()) {
+                                        break; // Keep existing phone number
+                                    }
+
+                                    boolean validChars = true;
+                                    int digitCount = 0;
+                                    for (int i = 0; i < nextPhone.length(); i++) {
+                                        char c = nextPhone.charAt(i);
+                                        if (Character.isDigit(c)) {
+                                            digitCount++;
+                                        } else if (c != '-') {
+                                            validChars = false;
+                                            break;
+                                        }
+                                    }
+
+                                    if (!validChars) {
+                                        System.out.println("[Input Error] Phone number can only contain digits and '-'.");
+                                        continue;
+                                    }
+
+                                    if (nextPhone.charAt(0) != '0') {
+                                        System.out.println("[Input Error] Malaysian phone numbers must start with 0.");
+                                        continue;
+                                    }
+
+                                    if (digitCount < 9 || digitCount > 11) {
+                                        System.out.println("[Input Error] Phone number must have 9 to 11 digits (Malaysian format).");
+                                        continue;
+                                    }
+
+                                    target.setPhoneNum(nextPhone);
+                                    break;
+                                }
+
+                                // --- 3. UPDATE ADDRESS (Optional, no validation) ---
+                                System.out.print("Enter New Address (Or press enter to keep '" + target.getAddress() + "'): ");
+                                String nextAddress = inputScanner.nextLine().trim();
+                                if (!nextAddress.isEmpty()) target.setAddress(nextAddress);
+
+                                // --- 4. UPDATE DELIVERY TYPE (Optional, must be Rush/Regular) ---
+                                while (true) {
+                                    System.out.print("Enter New Delivery Type (Or press enter to keep '" + target.getDeliveryType() + "'): ");
+                                    String nextDelType = inputScanner.nextLine().trim();
+                                    if (nextDelType.isEmpty()) break;
+
+                                    if (nextDelType.equalsIgnoreCase("Rush") || nextDelType.equalsIgnoreCase("Regular")) {
+                                        nextDelType = nextDelType.substring(0, 1).toUpperCase() + nextDelType.substring(1).toLowerCase();
+                                        target.setDeliveryType(nextDelType);
+                                        break;
+                                    }
+                                    System.out.println("[Error] Selection must strictly match either 'Rush' or 'Regular'.");
+                                }
+
+                                // --- 5. UPDATE SEAFOOD ITEMS (Add / Remove / Update Quantity) ---
+                                String editSeafood;
+                                while (true) {
+                                    System.out.print("Do you want to edit seafood items in this order? (y/n): ");
+                                    editSeafood = inputScanner.nextLine().trim().toLowerCase();
+                                    if (editSeafood.equals("y") || editSeafood.equals("n")) break;
+                                    System.out.println("[Input Error] Please enter only 'y' for Yes or 'n' for No.");
+                                }
+
+                                while (editSeafood.equals("y")) {
+                                    System.out.println("\n--- Current Seafood Items ---");
+                                    if (target.getSeafoodName().isEmpty()) {
+                                        System.out.println("No seafood items in this order.");
+                                    } else {
+                                        for (int i = 0; i < target.getSeafoodName().size(); i++) {
+                                            System.out.println("[" + i + "] " + target.getSeafoodName().get(i) + " : " + target.getSeafoodQuantity().get(i));
+                                        }
+                                    }
+
+                                    System.out.println("1. Add New Item");
+                                    System.out.println("2. Update Quantity of Existing Item");
+                                    System.out.println("3. Remove an Item");
+                                    System.out.println("4. Done Editing Seafood Items");
+                                    System.out.print("Enter choice (1-4): ");
+
+                                    int seafoodChoice = -1;
+                                    if (inputScanner.hasNextInt()) {
+                                        seafoodChoice = inputScanner.nextInt();
+                                        inputScanner.nextLine();
+                                    } else {
+                                        System.out.println("[Error] Please enter a valid number.");
+                                        inputScanner.nextLine();
+                                        continue;
+                                    }
+
+                                    if (seafoodChoice == 1) {
+                                        // Add new item
+                                        String seafoodItem;
+                                        while (true) {
+                                            System.out.print("Enter Seafood Item Name: ");
+                                            seafoodItem = inputScanner.nextLine().trim();
+
+                                            if (seafoodItem.isEmpty()) {
+                                                System.out.println("[Input Error] Seafood item name cannot be empty.");
+                                                continue;
+                                            }
+
+                                            boolean existsInSystem = false;
+                                            String matchedName = seafoodItem;
+
+                                            if (seafoodItem.equalsIgnoreCase("Tiger Shrimp")) {
+                                                existsInSystem = true; matchedName = "Tiger Shrimp";
+                                            } else if (seafoodItem.equalsIgnoreCase("White Shrimp")) {
+                                                existsInSystem = true; matchedName = "White Shrimp";
+                                            } else if (seafoodItem.equalsIgnoreCase("Royal Red Shrimp")) {
+                                                existsInSystem = true; matchedName = "Royal Red Shrimp";
+                                            } else if (seafoodItem.equalsIgnoreCase("Blue Pincer Crab")) {
+                                                existsInSystem = true; matchedName = "Blue Pincer Crab";
+                                            } else if (seafoodItem.equalsIgnoreCase("King Crab")) {
+                                                existsInSystem = true; matchedName = "King Crab";
+                                            }
+
+                                            if (!existsInSystem) {
+                                                System.out.println("[Input Error] '" + seafoodItem + "' is not a recognised seafood item.");
+                                                System.out.println("Available items: Tiger Shrimp, White Shrimp, Royal Red Shrimp, Blue Pincer Crab, King Crab");
+                                                continue;
+                                            }
+
+                                            seafoodItem = matchedName;
+                                            break;
+                                        }
+
+                                        int qty = 0;
+                                        while (true) {
+                                            System.out.print("Enter Quantity: ");
+                                            if (inputScanner.hasNextInt()) {
+                                                qty = inputScanner.nextInt();
+                                                inputScanner.nextLine();
+                                                if (qty > 0) break;
+                                                System.out.println("[Validation Error] Quantity must be greater than 0.");
+                                            } else {
+                                                System.out.println("[Type Error] Please enter a whole number integer.");
+                                                inputScanner.nextLine();
+                                            }
+                                        }
+
+                                        target.getSeafoodName().add(seafoodItem);
+                                        target.getSeafoodQuantity().add(qty);
+                                        System.out.println("[Success] Item added.");
+
+                                    } else if (seafoodChoice == 2) {
+                                        // Update quantity of existing item
+                                        if (target.getSeafoodName().isEmpty()) {
+                                            System.out.println("[Error] No items to update.");
+                                            continue;
+                                        }
+
+                                        int itemIdx = -1;
+                                        while (true) {
+                                            System.out.print("Enter item index to update quantity (0 to " + (target.getSeafoodName().size() - 1) + "): ");
+                                            if (inputScanner.hasNextInt()) {
+                                                itemIdx = inputScanner.nextInt();
+                                                inputScanner.nextLine();
+                                                if (itemIdx >= 0 && itemIdx < target.getSeafoodName().size()) break;
+                                                System.out.println("[Error] Index out of bounds.");
+                                            } else {
+                                                System.out.println("[Error] Please enter a valid numeric index.");
+                                                inputScanner.nextLine();
+                                            }
+                                        }
+
+                                        int newQty = 0;
+                                        while (true) {
+                                            System.out.print("Enter New Quantity: ");
+                                            if (inputScanner.hasNextInt()) {
+                                                newQty = inputScanner.nextInt();
+                                                inputScanner.nextLine();
+                                                if (newQty > 0) break;
+                                                System.out.println("[Validation Error] Quantity must be greater than 0.");
+                                            } else {
+                                                System.out.println("[Type Error] Please enter a whole number integer.");
+                                                inputScanner.nextLine();
+                                            }
+                                        }
+
+                                        target.getSeafoodQuantity().set(itemIdx, newQty);
+                                        System.out.println("[Success] Quantity updated.");
+
+                                    } else if (seafoodChoice == 3) {
+                                        // Remove an item
+                                        if (target.getSeafoodName().isEmpty()) {
+                                            System.out.println("[Error] No items to remove.");
+                                            continue;
+                                        }
+
+                                        int itemIdx = -1;
+                                        while (true) {
+                                            System.out.print("Enter item index to remove (0 to " + (target.getSeafoodName().size() - 1) + "): ");
+                                            if (inputScanner.hasNextInt()) {
+                                                itemIdx = inputScanner.nextInt();
+                                                inputScanner.nextLine();
+                                                if (itemIdx >= 0 && itemIdx < target.getSeafoodName().size()) break;
+                                                System.out.println("[Error] Index out of bounds.");
+                                            } else {
+                                                System.out.println("[Error] Please enter a valid numeric index.");
+                                                inputScanner.nextLine();
+                                            }
+                                        }
+
+                                        target.getSeafoodName().remove(itemIdx);
+                                        target.getSeafoodQuantity().remove(itemIdx);
+                                        System.out.println("[Success] Item removed.");
+
+                                    } else if (seafoodChoice == 4) {
+                                        break; // Exit seafood editing loop
+                                    } else {
+                                        System.out.println("[Error] Please enter a number between 1 and 4.");
+                                    }
+                                }
+
+                                System.out.println("\n[Success] Order fully updated:");
+                                System.out.println(target);
+
+
 
                 } else if (choice == 4) {
                     // 4. IMPLEMENT DELETING SEAFOOD ORDER WITH VALIDATION
