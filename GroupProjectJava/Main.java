@@ -1,5 +1,5 @@
-import java.util.*;
 import java.io.*;
+import java.util.*;
 
 public class Main{
     public static void main(String [] args){
@@ -36,7 +36,7 @@ public class Main{
             FileWriter fw = new FileWriter("output.txt");
             PrintWriter pw = new PrintWriter(fw);
 
-            pw.println(customer.get(0));
+            pw.println(customer.get(1));
 
             pw.close();
         }catch(IOException e) {

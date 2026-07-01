@@ -19,7 +19,7 @@ public abstract class Delivery {
     }
 
     public double deliveryFee(){
-        double deliveryFee = 0;
+        double deliveryFee;
 
         if(deliveryType.equalsIgnoreCase("Rush")){
             deliveryFee = 10;
@@ -30,8 +30,22 @@ public abstract class Delivery {
         return deliveryFee;
     }
 
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public String getPhoneNum() { return phoneNum; }
+    public void setPhoneNum(String phoneNum) { this.phoneNum = phoneNum; }
+
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
+
+    public String getDeliveryType() { return deliveryType; }
+    public void setDeliveryType(String deliveryType) { this.deliveryType = deliveryType; }
+
+
     public abstract double calcTotalPrice();
 
+    @Override
     public String toString(){
         return "Name : " + name + "\nPhone Number : " + phoneNum + "\nAddress : " + address + "\nDeliveryType : " + deliveryType + "\n";
     }
