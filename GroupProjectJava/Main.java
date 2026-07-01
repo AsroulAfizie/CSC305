@@ -304,7 +304,8 @@ public class Main{
                         } else {
                             System.out.println("[Error] Please enter a valid numeric integer index.");
                             inputScanner.nextLine();
-                        }
+                      
+                      }
                     }
 
                     customer.remove(removeIdx);
