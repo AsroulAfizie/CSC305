@@ -5,7 +5,6 @@ public class Main{
     public static void main(String [] args){
         try{
             ArrayList<SeafoodOrder> customer = new ArrayList<>();
-            System.out.println("Working dir: " + System.getProperty("user.dir"));
             FileReader fr = new FileReader("input.txt");
             BufferedReader br = new BufferedReader(fr);
 
@@ -72,71 +71,104 @@ public class Main{
                     }
 
                 } else if (choice == 2) {
-                    // 2. IMPLEMENT ADDING NEW ORDER WITH INPUT VALIDATION
+                    // =========================================================================
+                    // IMPLEMENT ADDING NEW ORDER WITH ROBUST INPUT VALIDATION
+                    // =========================================================================
                     String newName, newPhone, newAddress, newDelType;
 
+                    // 1. Validate Customer Name (Cannot be empty)
                     while (true) {
                         System.out.print("Enter Customer Name: ");
                         newName = inputScanner.nextLine().trim();
-                        if (!newName.isEmpty()) break;
-                        System.out.println("[Error] Name field cannot be left blank.");
+                        if (!newName.isEmpty()) {
+                            break;
+                        }
+                        System.out.println("[Input Error] Name field cannot be left blank.");
                     }
 
+                    // 2. Validate Phone Number (Cannot be empty)
                     while (true) {
                         System.out.print("Enter Phone Number: ");
                         newPhone = inputScanner.nextLine().trim();
-                        if (!newPhone.isEmpty()) break;
-                        System.out.println("[Error] Phone number field cannot be left blank.");
+                        if (!newPhone.isEmpty()) {
+                            break;
+                        }
+                        System.out.println("[Input Error] Phone number field cannot be left blank.");
                     }
 
+                    // 3. Validate Address (Cannot be empty)
                     while (true) {
                         System.out.print("Enter Address: ");
                         newAddress = inputScanner.nextLine().trim();
-                        if (!newAddress.isEmpty()) break;
-                        System.out.println("[Error] Address field cannot be left blank.");
+                        if (!newAddress.isEmpty()) {
+                            break;
+                        }
+                        System.out.println("[Input Error] Address field cannot be left blank.");
                     }
 
+                    // 4. Validate Delivery Type (Must be exactly Rush or Regular)
                     while (true) {
                         System.out.print("Enter Delivery Type (Rush/Regular): ");
                         newDelType = inputScanner.nextLine().trim();
-                        if (newDelType.equalsIgnoreCase("Rush") || newDelType.equalsIgnoreCase("Regular")) break;
-                        System.out.println("[Error] Type must match exactly 'Rush' or 'Regular'.");
+                        if (newDelType.equalsIgnoreCase("Rush") || newDelType.equalsIgnoreCase("Regular")) {
+                            // Format correctly to match your file style capitalization
+                            newDelType = newDelType.substring(0, 1).toUpperCase() + newDelType.substring(1).toLowerCase();
+                            break;
+                        }
+                        System.out.println("[Validation Error] Type must match exactly 'Rush' or 'Regular'.");
                     }
 
                     ArrayList<String> freshItems = new ArrayList<>();
                     ArrayList<Integer> freshQtties = new ArrayList<>();
                     String continuous = "y";
 
+                    // 5. Validate Seafood Items and Quantities dynamically
                     while (continuous.equalsIgnoreCase("y")) {
-                        System.out.print("Enter Seafood Item Name: ");
-                        String seafoodItem = inputScanner.nextLine().trim();
+                        String seafoodItem;
+                        while (true) {
+                            System.out.print("Enter Seafood Item Name: ");
+                            seafoodItem = inputScanner.nextLine().trim();
+                            if (!seafoodItem.isEmpty()) {
+                                break;
+                            }
+                            System.out.println("[Input Error] Seafood item name cannot be empty.");
+                        }
 
                         int qty = 0;
                         while (true) {
                             System.out.print("Enter Quantity: ");
+                            // Prevent string/character entry crashes
                             if (inputScanner.hasNextInt()) {
                                 qty = inputScanner.nextInt();
-                                inputScanner.nextLine(); // Clear buffer
-                                if (qty > 0) break;
-                                System.out.println("[Error] Quantity must be greater than 0.");
+                                inputScanner.nextLine(); // Clear scanner newline buffer
+                                if (qty > 0) {
+                                    break; // Valid positive number entered successfully
+                                }
+                                System.out.println("[Validation Error] Quantity must be greater than 0.");
                             } else {
-                                System.out.println("[Error] Invalid character input. Enter a whole number.");
-                                inputScanner.nextLine(); 
+                                System.out.println("[Type Error] Invalid input format. Please enter a whole number integer.");
+                                inputScanner.nextLine(); // Clear invalid non-integer string data from buffer
                             }
                         }
 
-                        if (!seafoodItem.isEmpty()) {
-                            freshItems.add(seafoodItem);
-                            freshQtties.add(qty);
-                        }
+                        freshItems.add(seafoodItem);
+                        freshQtties.add(qty);
 
-                        System.out.print("Add another item type to this cart? (y/n): ");
-                        continuous = inputScanner.nextLine().trim();
+                        // Validate loop exit command
+                        while (true) {
+                            System.out.print("Add another item type to this cart? (y/n): ");
+                            continuous = inputScanner.nextLine().trim().toLowerCase();
+                            if (continuous.equals("y") || continuous.equals("n")) {
+                                break;
+                            }
+                            System.out.println("[Input Error] Please enter only 'y' for Yes or 'n' for No.");
+                        }
                     }
 
+                    // Instantiate object with verified inputs
                     SeafoodOrder newCust = new SeafoodOrder(newName, newPhone, newAddress, newDelType, freshItems, freshQtties);
                     customer.add(newCust);
-                    System.out.println("[Success] Order added to dynamic memory lists.");
+                    System.out.println("[Success] Verified order successfully appended to system memory list.");
 
                 } else if (choice == 3) {
                     // 3. IMPLEMENT UPDATING SEAFOOD ORDER WITH VALIDATION
@@ -206,11 +238,11 @@ public class Main{
             inputScanner.close();
             // =========================================================================
 
-            FileWriter fw = new FileWriter("GroupProjectJava/output.txt");
+            FileWriter fw = new FileWriter("output.txt");
             PrintWriter pw = new PrintWriter(fw);
 
             // Synchronize and dump memory collection updates back into input.txt structure file
-            PrintWriter dataFileWriter = new PrintWriter(new FileWriter("GroupProjectJava/input.txt"));
+            PrintWriter dataFileWriter = new PrintWriter(new FileWriter("input.txt"));
             for (int i = 0; i < customer.size(); i++) {
                 SeafoodOrder current = customer.get(i);
                 StringBuilder sb = new StringBuilder();
