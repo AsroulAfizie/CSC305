@@ -71,104 +71,180 @@ public class Main{
                     }
 
                 } else if (choice == 2) {
-                    // =========================================================================
-                    // IMPLEMENT ADDING NEW ORDER WITH ROBUST INPUT VALIDATION
-                    // =========================================================================
-                    String newName, newPhone, newAddress, newDelType;
+                            // =========================================================================
+                            // IMPLEMENT ADDING NEW ORDER WITH ROBUST INPUT VALIDATION
+                            // =========================================================================
+                            String newName, newPhone, newAddress, newDelType;
 
-                    // 1. Validate Customer Name (Cannot be empty)
-                    while (true) {
-                        System.out.print("Enter Customer Name: ");
-                        newName = inputScanner.nextLine().trim();
-                        if (!newName.isEmpty()) {
-                            break;
-                        }
-                        System.out.println("[Input Error] Name field cannot be left blank.");
-                    }
+                            // 1. Validate Customer Name (Cannot contain numbers)
+                            // 1. Validate Customer Name (Must contain only letters and spaces)
+                            while (true) {
+                                System.out.print("Enter Customer Name: ");
+                                newName = inputScanner.nextLine().trim();
 
-                    // 2. Validate Phone Number (Cannot be empty)
-                    while (true) {
-                        System.out.print("Enter Phone Number: ");
-                        newPhone = inputScanner.nextLine().trim();
-                        if (!newPhone.isEmpty()) {
-                            break;
-                        }
-                        System.out.println("[Input Error] Phone number field cannot be left blank.");
-                    }
-
-                    // 3. Validate Address (Cannot be empty)
-                    while (true) {
-                        System.out.print("Enter Address: ");
-                        newAddress = inputScanner.nextLine().trim();
-                        if (!newAddress.isEmpty()) {
-                            break;
-                        }
-                        System.out.println("[Input Error] Address field cannot be left blank.");
-                    }
-
-                    // 4. Validate Delivery Type (Must be exactly Rush or Regular)
-                    while (true) {
-                        System.out.print("Enter Delivery Type (Rush/Regular): ");
-                        newDelType = inputScanner.nextLine().trim();
-                        if (newDelType.equalsIgnoreCase("Rush") || newDelType.equalsIgnoreCase("Regular")) {
-                            // Format correctly to match your file style capitalization
-                            newDelType = newDelType.substring(0, 1).toUpperCase() + newDelType.substring(1).toLowerCase();
-                            break;
-                        }
-                        System.out.println("[Validation Error] Type must match exactly 'Rush' or 'Regular'.");
-                    }
-
-                    ArrayList<String> freshItems = new ArrayList<>();
-                    ArrayList<Integer> freshQtties = new ArrayList<>();
-                    String continuous = "y";
-
-                    // 5. Validate Seafood Items and Quantities dynamically
-                    while (continuous.equalsIgnoreCase("y")) {
-                        String seafoodItem;
-                        while (true) {
-                            System.out.print("Enter Seafood Item Name: ");
-                            seafoodItem = inputScanner.nextLine().trim();
-                            if (!seafoodItem.isEmpty()) {
-                                break;
-                            }
-                            System.out.println("[Input Error] Seafood item name cannot be empty.");
-                        }
-
-                        int qty = 0;
-                        while (true) {
-                            System.out.print("Enter Quantity: ");
-                            // Prevent string/character entry crashes
-                            if (inputScanner.hasNextInt()) {
-                                qty = inputScanner.nextInt();
-                                inputScanner.nextLine(); // Clear scanner newline buffer
-                                if (qty > 0) {
-                                    break; // Valid positive number entered successfully
+                                if (newName.isEmpty()) {
+                                    System.out.println("[Input Error] Name field cannot be left blank.");
+                                    continue;
                                 }
-                                System.out.println("[Validation Error] Quantity must be greater than 0.");
-                            } else {
-                                System.out.println("[Type Error] Invalid input format. Please enter a whole number integer.");
-                                inputScanner.nextLine(); // Clear invalid non-integer string data from buffer
+
+                                boolean validName = true;
+                                for (int i = 0; i < newName.length(); i++) {
+                                    char c = newName.charAt(i);
+                                    if (!Character.isLetter(c) && c != ' ') {
+                                        validName = false;
+                                        break;
+                                    }
+                                }
+
+                                if (!validName) {
+                                    System.out.println("[Input Error] Name can only contain letters and spaces (no numbers or symbols).");
+                                    continue;
+                                }
+
+                                break; // Valid name
                             }
-                        }
 
-                        freshItems.add(seafoodItem);
-                        freshQtties.add(qty);
+                            // 2. Validate Phone Number (Malaysian format: digits and '-' only, starts with 0, 9-11 digits)
+                            while (true) {
+                                System.out.print("Enter Phone Number (e.g. 012-3456789): ");
+                                newPhone = inputScanner.nextLine().trim();
 
-                        // Validate loop exit command
-                        while (true) {
-                            System.out.print("Add another item type to this cart? (y/n): ");
-                            continuous = inputScanner.nextLine().trim().toLowerCase();
-                            if (continuous.equals("y") || continuous.equals("n")) {
-                                break;
+                                if (newPhone.isEmpty()) {
+                                    System.out.println("[Input Error] Phone number field cannot be left blank.");
+                                    continue;
+                                }
+
+                                boolean validChars = true;
+                                int digitCount = 0;
+                                for (int i = 0; i < newPhone.length(); i++) {
+                                    char c = newPhone.charAt(i);
+                                    if (Character.isDigit(c)) {
+                                        digitCount++;
+                                    } else if (c != '-') {
+                                        validChars = false;
+                                        break;
+                                    }
+                                }
+
+                                if (!validChars) {
+                                    System.out.println("[Input Error] Phone number can only contain digits and '-'.");
+                                    continue;
+                                }
+
+                                if (newPhone.charAt(0) != '0') {
+                                    System.out.println("[Input Error] Malaysian phone numbers must start with 0.");
+                                    continue;
+                                }
+
+                                if (digitCount < 9 || digitCount > 11) {
+                                    System.out.println("[Input Error] Phone number must have 9 to 11 digits (Malaysian format).");
+                                    continue;
+                                }
+
+                                break; // Valid phone number
                             }
-                            System.out.println("[Input Error] Please enter only 'y' for Yes or 'n' for No.");
-                        }
-                    }
 
-                    // Instantiate object with verified inputs
-                    SeafoodOrder newCust = new SeafoodOrder(newName, newPhone, newAddress, newDelType, freshItems, freshQtties);
-                    customer.add(newCust);
-                    System.out.println("[Success] Verified order successfully appended to system memory list.");
+                            // 3. Address (No validation required)
+                            System.out.print("Enter Address: ");
+                            newAddress = inputScanner.nextLine().trim();
+
+                            // 4. Validate Delivery Type (Must be exactly Rush or Regular)
+                            while (true) {
+                                System.out.print("Enter Delivery Type (Rush/Regular): ");
+                                newDelType = inputScanner.nextLine().trim();
+                                if (newDelType.equalsIgnoreCase("Rush") || newDelType.equalsIgnoreCase("Regular")) {
+                                    // Format correctly to match your file style capitalization
+                                    newDelType = newDelType.substring(0, 1).toUpperCase() + newDelType.substring(1).toLowerCase();
+                                    break;
+                                }
+                                System.out.println("[Validation Error] Type must match exactly 'Rush' or 'Regular'.");
+                            }
+
+                            ArrayList<String> freshItems = new ArrayList<>();
+                            ArrayList<Integer> freshQtties = new ArrayList<>();
+                            String continuous = "y";
+
+                            // 5. Validate Seafood Items (must match system's priced items) and Quantities
+                            while (continuous.equalsIgnoreCase("y")) {
+
+                                String seafoodItem;
+                                while (true) {
+                                    System.out.print("Enter Seafood Item Name: ");
+                                    seafoodItem = inputScanner.nextLine().trim();
+
+                                    if (seafoodItem.isEmpty()) {
+                                        System.out.println("[Input Error] Seafood item name cannot be empty.");
+                                        continue;
+                                    }
+
+                                    boolean existsInSystem = false;
+                                    String matchedName = seafoodItem;
+
+                                    if (seafoodItem.equalsIgnoreCase("Tiger Shrimp")) {
+                                        existsInSystem = true;
+                                        matchedName = "Tiger Shrimp";
+                                    } else if (seafoodItem.equalsIgnoreCase("White Shrimp")) {
+                                        existsInSystem = true;
+                                        matchedName = "White Shrimp";
+                                    } else if (seafoodItem.equalsIgnoreCase("Royal Red Shrimp")) {
+                                        existsInSystem = true;
+                                        matchedName = "Royal Red Shrimp";
+                                    } else if (seafoodItem.equalsIgnoreCase("Blue Pincer Crab")) {
+                                        existsInSystem = true;
+                                        matchedName = "Blue Pincer Crab";
+                                    } else if (seafoodItem.equalsIgnoreCase("King Crab")) {
+                                        existsInSystem = true;
+                                        matchedName = "King Crab";
+                                    }
+
+                                    if (!existsInSystem) {
+                                        System.out.println("[Input Error] '" + seafoodItem + "' is not a recognised seafood item.");
+                                        System.out.println("Available items: Tiger Shrimp, White Shrimp, Royal Red Shrimp, Blue Pincer Crab, King Crab");
+                                        continue;
+                                    }
+
+                                    seafoodItem = matchedName;
+                                    break; // Valid item name
+                                }
+
+                                int qty = 0;
+                                while (true) {
+                                    System.out.print("Enter Quantity: ");
+                                    // Prevent string/character entry crashes
+                                    if (inputScanner.hasNextInt()) {
+                                        qty = inputScanner.nextInt();
+                                        inputScanner.nextLine(); // Clear scanner newline buffer
+                                        if (qty > 0) {
+                                            break; // Valid positive number entered successfully
+                                        }
+                                        System.out.println("[Validation Error] Quantity must be greater than 0.");
+                                    } else {
+                                        System.out.println("[Type Error] Invalid input format. Please enter a whole number integer.");
+                                        inputScanner.nextLine(); // Clear invalid non-integer string data from buffer
+                                    }
+                                }
+
+                                freshItems.add(seafoodItem);
+                                freshQtties.add(qty);
+
+                                // Validate loop exit command
+                                while (true) {
+                                    System.out.print("Add another item type to this cart? (y/n): ");
+                                    continuous = inputScanner.nextLine().trim().toLowerCase();
+                                    if (continuous.equals("y") || continuous.equals("n")) {
+                                        break;
+                                    }
+                                    System.out.println("[Input Error] Please enter only 'y' for Yes or 'n' for No.");
+                                }
+                            }
+
+                            // Instantiate object with verified inputs
+                            SeafoodOrder newCust = new SeafoodOrder(newName, newPhone, newAddress, newDelType, freshItems, freshQtties);
+                            customer.add(newCust);
+                            System.out.println("[Success] Verified order successfully appended to system memory list.");
+
+
+                
 
                 } else if (choice == 3) {
                     // 3. IMPLEMENT UPDATING SEAFOOD ORDER WITH VALIDATION
@@ -241,24 +317,91 @@ public class Main{
             FileWriter fw = new FileWriter("output.txt");
             PrintWriter pw = new PrintWriter(fw);
 
-            // Synchronize and dump memory collection updates back into input.txt structure file
-            PrintWriter dataFileWriter = new PrintWriter(new FileWriter("input.txt"));
-            for (int i = 0; i < customer.size(); i++) {
-                SeafoodOrder current = customer.get(i);
-                StringBuilder sb = new StringBuilder();
-                sb.append(current.getName()).append(";")
-                  .append(current.getPhoneNum()).append(";")
-                  .append(current.getAddress()).append(";")
-                  .append(current.getDeliveryType());
+            // Get current date for the report
+                java.time.LocalDate today = java.time.LocalDate.now();
 
-                for (int j = 0; j < current.seafoodName.size(); j++) {
-                    sb.append(";").append(current.seafoodName.get(j))
-                      .append(";").append(current.seafoodQuantity.get(j));
+                pw.println("===== DAILY SEAFOOD ORDER REPORT =====");
+                pw.println("Generated on: " + today);
+                pw.println();
+
+                // --- Summary calculations ---
+                int totalOrders = customer.size();
+                double totalRevenue = 0;
+                int rushCount = 0;
+                int regularCount = 0;
+
+                ArrayList<String> seafoodTypes = new ArrayList<>();
+                ArrayList<Integer> seafoodTotals = new ArrayList<>();
+
+                for (int i = 0; i < customer.size(); i++) {
+                    SeafoodOrder c = customer.get(i);
+                    totalRevenue += c.calcTotalPrice();
+
+                    if (c.getDeliveryType().equalsIgnoreCase("Rush")) {
+                        rushCount++;
+                    } else if (c.getDeliveryType().equalsIgnoreCase("Regular")) {
+                        regularCount++;
+                    }
+
+                    for (int j = 0; j < c.seafoodName.size(); j++) {
+                        String name = c.seafoodName.get(j);
+                        int qty = c.seafoodQuantity.get(j);
+
+                        boolean found = false;
+                        for (int k = 0; k < seafoodTypes.size(); k++) {
+                            if (seafoodTypes.get(k).equalsIgnoreCase(name)) {
+                                seafoodTotals.set(k, seafoodTotals.get(k) + qty);
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            seafoodTypes.add(name);
+                            seafoodTotals.add(qty);
+                        }
+                    }
                 }
-                dataFileWriter.println(sb.toString());
-                pw.println(current); // Keeping original output file copy mechanism
-            }
-            dataFileWriter.close();
+
+                pw.println("--- SUMMARY ---");
+                pw.println("Total Orders: " + totalOrders);
+                pw.println("Total Revenue: RM" + String.format("%.2f", totalRevenue));
+                pw.println();
+
+                pw.println("--- DELIVERY TYPE BREAKDOWN ---");
+                pw.println("Rush Orders: " + rushCount);
+                pw.println("Regular Orders: " + regularCount);
+                pw.println();
+
+                pw.println("--- SEAFOOD SALES SUMMARY ---");
+                for (int i = 0; i < seafoodTypes.size(); i++) {
+                    pw.println(seafoodTypes.get(i) + " : " + seafoodTotals.get(i) + " unit(s) sold");
+                }
+                pw.println();
+
+                pw.println("--- DETAILED ORDER LIST ---");
+                for (int i = 0; i < customer.size(); i++) {
+                    pw.println("[" + i + "] " + customer.get(i));
+                }
+
+                pw.close();
+
+                // Keep input.txt as the raw data backup (unchanged from before)
+                PrintWriter dataFileWriter = new PrintWriter(new FileWriter("input.txt"));
+                for (int i = 0; i < customer.size(); i++) {
+                    SeafoodOrder current = customer.get(i);
+                    StringBuilder sb = new StringBuilder();
+                    sb.append(current.getName()).append(";")
+                    .append(current.getPhoneNum()).append(";")
+                    .append(current.getAddress()).append(";")
+                    .append(current.getDeliveryType());
+
+                    for (int j = 0; j < current.seafoodName.size(); j++) {
+                        sb.append(";").append(current.seafoodName.get(j))
+                        .append(";").append(current.seafoodQuantity.get(j));
+                    }
+                    dataFileWriter.println(sb.toString());
+                }
+                dataFileWriter.close();
 
             pw.close();
         }catch(IOException e) {

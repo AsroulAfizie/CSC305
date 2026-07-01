@@ -52,7 +52,7 @@ public class SeafoodOrder extends Delivery {
             data.append(seafoodName.get(i)).append(" : ").append(seafoodQuantity.get(i)).append("\n");
         }
 
-        return super.toString() + data + calcTotalPrice();
+        return super.toString() + data + "Total Price: RM" + String.format("%.2f", calcTotalPrice());
     }
 
 }
