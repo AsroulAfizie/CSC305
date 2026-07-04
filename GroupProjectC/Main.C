@@ -47,6 +47,19 @@ int inputFile(char *line, Delivery *cust){
     return 1;
 }
 
+double getDeliveryFee(const Delivery *cust){
+    double deliveryFee = 0;
+    char deliveryType [16];
+    strcpy(deliveryType,cust->deliveryType);
+
+    if(strcmp(deliveryType, "Rush") == 0){
+        return 10;
+    }else{
+        return 5;
+    }
+    return 0;
+}
+
 
 
 double getPrice(const char *seafoodName){
@@ -73,7 +86,7 @@ double calculatePrice(const Delivery *cust){
         totalPrice += price * cust->items[i].quantity;
     }
 
-    
+    totalPrice += getDeliveryFee(cust);
 
     return totalPrice;
 }
