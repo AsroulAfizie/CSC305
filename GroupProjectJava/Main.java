@@ -14,7 +14,7 @@ public class Main{
                 ArrayList <String> seafoodNameArr = new ArrayList<>();
                 ArrayList <Integer> quantityArr = new ArrayList<>();
 
-                StringTokenizer st = new StringTokenizer(data,";");
+                StringTokenizer st = new StringTokenizer(data,",");
                 String name = st.nextToken();
                 String phoneNum = st.nextToken();
                 String address = st.nextToken();
