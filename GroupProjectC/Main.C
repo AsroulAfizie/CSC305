@@ -47,6 +47,37 @@ int inputFile(char *line, Delivery *cust){
     return 1;
 }
 
+
+
+double getPrice(const char *seafoodName){
+    if(strcmp(seafoodName, "Tiger Shrimp") == 0){
+        return 200.00;
+    }else if(strcmp(seafoodName, "White Shrimp") == 0){
+        return 125.00;
+    }else if(strcmp(seafoodName, "King Crab") == 0){
+        return 990.00;
+    }else if(strcmp(seafoodName, "Royal Red Shrimp") == 0){
+        return 175.00;
+    }else if(strcmp(seafoodName, "Blue Pincer Crab") == 0){
+        return 150.00;
+    }else{
+        return 0;
+    }
+}
+
+double calculatePrice(const Delivery *cust){
+    double totalPrice = 0;
+    
+    for(int i = 0; i < cust->itemCount; i++){
+        double price = getPrice(cust->items[i].seafoodName);
+        totalPrice += price * cust->items[i].quantity;
+    }
+
+    
+
+    return totalPrice;
+}
+
 void printOrder(const Delivery *cust){
     printf("Customer: %s\n", cust->name);
     printf("Phone Number : %s\n", cust->phoneNum);
@@ -54,10 +85,13 @@ void printOrder(const Delivery *cust){
     printf("Delivery Type : %s\n", cust->deliveryType);
 
     for(int i = 0; i < cust->itemCount;i++){
-        printf("  - %s \t -%d\n", cust->items[i].seafoodName,cust->items[i].quantity);
+        printf("- %s \t -%d\n", cust->items[i].seafoodName,cust->items[i].quantity);
     }
+    printf("RM%.2f\n", calculatePrice(cust));
     printf("\n");
 }
+
+
 int main(void) {
     FILE *fp = fopen("input.txt", "r");
     if(!fp){
