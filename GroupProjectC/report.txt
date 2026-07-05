@@ -2,15 +2,15 @@
 Generated on: 2026-07-05
 
 --- SUMMARY ---
-Total Orders: 3
-Total Revenue: RM3480.00
+Total Orders: 4
+Total Revenue: RM3885.00
 
 --- DELIVERY TYPE BREAKDOWN ---
 Rush Orders: 2
-Regular Orders: 1
+Regular Orders: 2
 
 --- SEAFOOD SALES SUMMARY ---
-Tiger Shrimp : 3 unit(s) sold
+Tiger Shrimp : 5 unit(s) sold
 White Shrimp : 7 unit(s) sold
 King Crab : 2 unit(s) sold
 
@@ -32,9 +32,16 @@ Total Price: RM630.00
 
 [2] Customer: Mohamed Amir Asyraf
 Phone Number : 0142604528
-Address : UiTM Segamat
+Address : UiTM Pasir Gudang
 Delivery Type : Rush
 Tiger Shrimp : 2
 King Crab : 2
 Total Price: RM2390.00
+
+[3] Customer: Harith
+Phone Number : 0123456789
+Address : UiTM Segamat
+Delivery Type : Regular
+Tiger Shrimp : 2
+Total Price: RM405.00
 

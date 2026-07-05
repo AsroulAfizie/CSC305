@@ -92,7 +92,24 @@ int isValidSeafood(const char *item) {
             strcasecmp(item, "Royal Red Shrimp") == 0 ||
             strcasecmp(item, "Blue Pincer Crab") == 0);
 }
+int containsSubstring(const char *haystack, const char *needle) {
+    int hLen = strlen(haystack);
+    int nLen = strlen(needle);
 
+    if (nLen == 0) return 0;
+
+    for (int i = 0; i <= hLen - nLen; i++) {
+        int match = 1;
+        for (int j = 0; j < nLen; j++) {
+            if (tolower((unsigned char)haystack[i + j]) != tolower((unsigned char)needle[j])) {
+                match = 0;
+                break;
+            }
+        }
+        if (match) return 1;
+    }
+    return 0;
+}
 double getPrice(const char *seafoodName){
     if(strcmp(seafoodName, "Tiger Shrimp") == 0){
         return 200.00;
@@ -357,7 +374,10 @@ while (1) {
 
 void handleSearchUpdate(Delivery customer[], int customerCount) {
     char buffer[256];
-    if (customerCount == 0) return;
+    if (customerCount == 0) {
+        printf("No entries inside memory tracking records to modify.\n");
+        return;
+    }
 
     int subChoice = 0;
     printf("\n1. Search Order\n2. Update Order\nEnter choice (1-2): ");
@@ -371,17 +391,83 @@ void handleSearchUpdate(Delivery customer[], int customerCount) {
         searchKey[strcspn(searchKey, "\n")] = 0;
         trimString(searchKey);
 
+        if (strlen(searchKey) == 0) {
+            printf("[Input Error] Search field cannot be left blank.\n");
+            return;
+        }
+
+        int found = 0;
         for (int i = 0; i < customerCount; i++) {
-            if (strcasecmp(customer[i].name, searchKey) == 0) {
+            if (containsSubstring(customer[i].name, searchKey)) {
                 printOrder(&customer[i]);
+                found = 1;
             }
         }
-    } else if (subChoice == 2) {
-        int targetIdx;
-        printf("Enter index to update (0 to %d): ", customerCount - 1);
-        fgets(buffer, sizeof(buffer), stdin);
-        if (sscanf(buffer, "%d", &targetIdx) != 1 || targetIdx < 0 || targetIdx >= customerCount) return;
 
+        if (!found) {
+            printf("[Search Error] No matching order found for '%s'.\n", searchKey);
+        }
+
+    } else if (subChoice == 2) {
+        // --- Get valid index with retry loop ---
+        int targetIdx = -1;
+        while (1) {
+            printf("Enter index to update (0 to %d): ", customerCount - 1);
+            fgets(buffer, sizeof(buffer), stdin);
+
+            if (sscanf(buffer, "%d", &targetIdx) != 1) {
+                printf("[Input Error] Please enter a valid numeric index.\n");
+                continue;
+            }
+
+            if (targetIdx < 0 || targetIdx >= customerCount) {
+                printf("[Error] Index out of bounds. Must be between 0 and %d.\n", customerCount - 1);
+                continue;
+            }
+
+            break; // Valid index entered
+        }
+
+        printf("\n[Match Found] Current order details:\n");
+        printOrder(&customer[targetIdx]);
+
+        // --- Update Name ---
+        while (1) {
+            printf("Enter New Name (Or press enter to keep '%s'): ", customer[targetIdx].name);
+            char nextName[100];
+            fgets(nextName, sizeof(nextName), stdin);
+            nextName[strcspn(nextName, "\n")] = 0;
+            trimString(nextName);
+
+            if (strlen(nextName) == 0) break; // Keep existing
+
+            if (!isValidName(nextName)) {
+                printf("[Input Error] Name can only contain letters and spaces (no numbers or symbols).\n");
+                continue;
+            }
+            strcpy(customer[targetIdx].name, nextName);
+            break;
+        }
+
+        // --- Update Phone Number ---
+        while (1) {
+            printf("Enter New Phone Number (Or press enter to keep '%s'): ", customer[targetIdx].phoneNum);
+            char nextPhone[100];
+            fgets(nextPhone, sizeof(nextPhone), stdin);
+            nextPhone[strcspn(nextPhone, "\n")] = 0;
+            trimString(nextPhone);
+
+            if (strlen(nextPhone) == 0) break; // Keep existing
+
+            if (!isValidPhone(nextPhone)) {
+                printf("[Input Error] Phone number must start with 0, contain only digits and '-', with 9-11 digits total.\n");
+                continue;
+            }
+            strcpy(customer[targetIdx].phoneNum, nextPhone);
+            break;
+        }
+
+        // --- Update Address ---
         printf("Enter New Address (Or press enter to keep current): ");
         char nextAddress[100];
         fgets(nextAddress, sizeof(nextAddress), stdin);
@@ -389,6 +475,7 @@ void handleSearchUpdate(Delivery customer[], int customerCount) {
         trimString(nextAddress);
         if (strlen(nextAddress) > 0) strcpy(customer[targetIdx].address, nextAddress);
 
+        // --- Update Delivery Type ---
         while (1) {
             printf("Enter New Delivery Type (Or press enter to keep current): ");
             char nextDelType[100];
@@ -403,7 +490,153 @@ void handleSearchUpdate(Delivery customer[], int customerCount) {
                 break;
             }
         }
+
+        // --- Update Seafood Items ---
+        char editAnswer[10];
+        while (1) {
+            printf("Do you want to edit seafood items in this order? (y/n): ");
+            fgets(editAnswer, sizeof(editAnswer), stdin);
+            editAnswer[strcspn(editAnswer, "\n")] = 0;
+            trimString(editAnswer);
+            if (strlen(editAnswer) == 1 && (editAnswer[0] == 'y' || editAnswer[0] == 'Y' || editAnswer[0] == 'n' || editAnswer[0] == 'N')) {
+                break;
+            }
+            printf("[Input Error] Please enter only 'y' for Yes or 'n' for No.\n");
+        }
+
+        while (editAnswer[0] == 'y' || editAnswer[0] == 'Y') {
+            printf("\n--- Current Seafood Items ---\n");
+            if (customer[targetIdx].itemCount == 0) {
+                printf("No seafood items in this order.\n");
+            } else {
+                for (int i = 0; i < customer[targetIdx].itemCount; i++) {
+                    printf("[%d] %s : %d\n", i, customer[targetIdx].items[i].seafoodName, customer[targetIdx].items[i].quantity);
+                }
+            }
+
+            printf("1. Add New Item\n");
+            printf("2. Update Quantity of Existing Item\n");
+            printf("3. Remove an Item\n");
+            printf("4. Done Editing Seafood Items\n");
+            printf("Enter choice (1-4): ");
+
+            int seafoodChoice = -1;
+            fgets(buffer, sizeof(buffer), stdin);
+            if (sscanf(buffer, "%d", &seafoodChoice) != 1) {
+                printf("[Error] Please enter a valid number.\n");
+                continue;
+            }
+
+            if (seafoodChoice == 1) {
+                if (customer[targetIdx].itemCount >= MAX_ITEMS) {
+                    printf("[Error] Maximum item limit reached for this order.\n");
+                    continue;
+                }
+
+                char seafoodInput[100];
+                while (1) {
+                    printf("Enter Seafood Item Name: ");
+                    fgets(seafoodInput, sizeof(seafoodInput), stdin);
+                    seafoodInput[strcspn(seafoodInput, "\n")] = 0;
+                    trimString(seafoodInput);
+
+                    if (strlen(seafoodInput) == 0) {
+                        printf("[Input Error] Seafood item name cannot be empty.\n");
+                        continue;
+                    }
+
+                    if (isValidSeafood(seafoodInput)) {
+                        if (strcasecmp(seafoodInput, "Tiger Shrimp") == 0) strcpy(seafoodInput, "Tiger Shrimp");
+                        else if (strcasecmp(seafoodInput, "White Shrimp") == 0) strcpy(seafoodInput, "White Shrimp");
+                        else if (strcasecmp(seafoodInput, "King Crab") == 0) strcpy(seafoodInput, "King Crab");
+                        else if (strcasecmp(seafoodInput, "Royal Red Shrimp") == 0) strcpy(seafoodInput, "Royal Red Shrimp");
+                        else if (strcasecmp(seafoodInput, "Blue Pincer Crab") == 0) strcpy(seafoodInput, "Blue Pincer Crab");
+                        break;
+                    }
+                    printf("[Input Error] '%s' is not a recognised seafood item.\n", seafoodInput);
+                    printf("Available items: Tiger Shrimp, White Shrimp, Royal Red Shrimp, Blue Pincer Crab, King Crab\n");
+                }
+
+                int qty = 0;
+                while (1) {
+                    printf("Enter Quantity: ");
+                    fgets(buffer, sizeof(buffer), stdin);
+                    if (sscanf(buffer, "%d", &qty) == 1 && qty > 0) break;
+                    printf("[Type Error] Please enter a whole positive number.\n");
+                }
+
+                strcpy(customer[targetIdx].items[customer[targetIdx].itemCount].seafoodName, seafoodInput);
+                customer[targetIdx].items[customer[targetIdx].itemCount].quantity = qty;
+                customer[targetIdx].itemCount++;
+                printf("[Success] Item added.\n");
+
+            } else if (seafoodChoice == 2) {
+                if (customer[targetIdx].itemCount == 0) {
+                    printf("[Error] No items to update.\n");
+                    continue;
+                }
+
+                int itemIdx = -1;
+                while (1) {
+                    printf("Enter item index to update quantity (0 to %d): ", customer[targetIdx].itemCount - 1);
+                    fgets(buffer, sizeof(buffer), stdin);
+                    if (sscanf(buffer, "%d", &itemIdx) == 1 && itemIdx >= 0 && itemIdx < customer[targetIdx].itemCount) break;
+                    printf("[Error] Please enter a valid index within range.\n");
+                }
+
+                int newQty = 0;
+                while (1) {
+                    printf("Enter New Quantity: ");
+                    fgets(buffer, sizeof(buffer), stdin);
+                    if (sscanf(buffer, "%d", &newQty) == 1 && newQty > 0) break;
+                    printf("[Type Error] Please enter a whole positive number.\n");
+                }
+
+                customer[targetIdx].items[itemIdx].quantity = newQty;
+                printf("[Success] Quantity updated.\n");
+
+            } else if (seafoodChoice == 3) {
+                if (customer[targetIdx].itemCount == 0) {
+                    printf("[Error] No items to remove.\n");
+                    continue;
+                }
+
+                int itemIdx = -1;
+                while (1) {
+                    printf("Enter item index to remove (0 to %d): ", customer[targetIdx].itemCount - 1);
+                    fgets(buffer, sizeof(buffer), stdin);
+                    if (sscanf(buffer, "%d", &itemIdx) == 1 && itemIdx >= 0 && itemIdx < customer[targetIdx].itemCount) break;
+                    printf("[Error] Please enter a valid index within range.\n");
+                }
+
+                for (int i = itemIdx; i < customer[targetIdx].itemCount - 1; i++) {
+                    customer[targetIdx].items[i] = customer[targetIdx].items[i + 1];
+                }
+                customer[targetIdx].itemCount--;
+                printf("[Success] Item removed.\n");
+
+            } else if (seafoodChoice == 4) {
+                break;
+
+            } else {
+                printf("[Error] Please enter a number between 1 and 4.\n");
+                continue;
+            }
+
+            while (1) {
+                printf("Edit another seafood item action? (y/n): ");
+                fgets(editAnswer, sizeof(editAnswer), stdin);
+                editAnswer[strcspn(editAnswer, "\n")] = 0;
+                trimString(editAnswer);
+                if (strlen(editAnswer) == 1 && (editAnswer[0] == 'y' || editAnswer[0] == 'Y' || editAnswer[0] == 'n' || editAnswer[0] == 'N')) {
+                    break;
+                }
+                printf("[Input Error] Please enter only 'y' for Yes or 'n' for No.\n");
+            }
+        }
+
         printf("[Success] Order updated.\n");
+        printOrder(&customer[targetIdx]);
     }
 }
 
