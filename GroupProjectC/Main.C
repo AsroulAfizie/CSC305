@@ -170,8 +170,40 @@ void addData(Delivery orders[], int *count){
     printf("\nOrder added Successfully \n\n");
 }
 
-//========ADD DATA
+//========SEARCH AND UPDATE
 
+int findbyName(const Delivery cust[], int count, const char *name){
+    for(int i = 0; i < count; i++){
+        if(strcmp(cust[i].name, name) == 0){
+            return i; // Return the Index of the Searched Name.
+        }
+    }
+    return -1; //Name Not Found.
+}
+
+void searchAndUpdate(Delivery cust[], int count){
+    char name[100];
+    printf("Enter Name to Search : ");
+    scanf(" %[^n]", name);
+
+    int index = findbyName(cust, count, name);
+    if(index == -1){
+        printf("Customer not Found");
+        return;
+    } 
+
+    printf("\nCustomer Found!");
+    printOrder(&cust[index]);
+
+    printf("Update Delivery Type [Rush/Regular] : ");
+    scanf(" %[^\n]", cust[index].deliveryType);
+
+    printf("Update Phone Number : ");
+    scanf(" %[^\n]", cust[index].phoneNum);
+
+    printf("Order Updated! \n\n");
+    printOrder(&cust[index]);
+}
 
 int main(void) {
     Delivery cust[100];
@@ -196,6 +228,12 @@ int main(void) {
                 break;
             case 2 :
                 addData(cust, &count);
+                break;
+            case 3 :
+                searchAndUpdate(cust, count);
+                break;
+            case 4: 
+            
             case 5 : 
                 printf("Fuck Off"); 
                 break;
