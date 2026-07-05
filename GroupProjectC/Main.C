@@ -277,9 +277,6 @@ void handleDeleteData(Delivery customer[], int *customerCount) {
     printf("[Success] Order deleted.\n");
 }
 
-// =========================================================================
-// 4) MAIN INTERACTIVE CONTROLLER (Rubric 2c, 4)
-// =========================================================================
 int main(void) {
     Delivery customer[MAX_CUSTOMERS];
     int customerCount = 0;
@@ -341,29 +338,5 @@ int main(void) {
                 break;
         }
     }
-    return 0;
-}
-
-int main(void) {
-    FILE *fp = fopen("input.txt", "r");
-    if(!fp){
-        perror("Error Opening Files");
-        return 1;
-    }
-
-    char line[1024];
-
-    int valid = 1;
-    while(fgets(line, sizeof(line), fp)){
-        Delivery cust;
-
-        if(inputFile(line, &cust)){
-            printOrder(&cust);
-        }else{
-            printf("Incomplete!");
-        }
-
-    }
-    fclose(fp);
     return 0;
 }
