@@ -2,8 +2,11 @@
 #include <cstring>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
+#include <time.h>
 //STARTING
-
+#define MAX_CUSTOMERS 100
+#define MAX_ITEMS 100
 typedef struct{
     char seafoodName[100];
     int quantity;
@@ -22,23 +25,28 @@ int inputFile(char *line, Delivery *cust){
     char *token;
 
     token = strtok(line, ",");
+    if(!token) return 0;
     strcpy(cust->name, token);
 
     token = strtok(NULL, ",");
+    if(!token) return 0;
     strcpy(cust->phoneNum, token);
 
     token = strtok(NULL, ",");
+    if(!token) return 0;
     strcpy(cust->address, token);
 
     token = strtok(NULL, ",");
+    if(!token) return 0;
     strcpy(cust->deliveryType, token);
 
     cust->itemCount = 0;
     while((token = strtok(NULL, ",")) != NULL){
+        if(!token) return 0;
         strcpy(cust->items[cust->itemCount].seafoodName, token);
 
         token = strtok(NULL, ",");
-        if(!token) break;
+        if(!token) return 0;
         cust->items[cust->itemCount].quantity = atoi(token);
 
         cust->itemCount++;
@@ -46,6 +54,16 @@ int inputFile(char *line, Delivery *cust){
 
     return 1;
 }
+int isValidName(const char *name) {
+    if (strlen(name) == 0) return 0;
+    for (int i = 0; name[i] != '\0'; i++) {
+        if (!isalpha((unsigned char)name[i]) && name[i] != ' ') {
+            return 0;
+        }
+    }
+    return 1;
+}
+
 
 double getDeliveryFee(const Delivery *cust){
     double deliveryFee = 0;
@@ -60,7 +78,21 @@ double getDeliveryFee(const Delivery *cust){
     return 0;
 }
 
+void trimString(char *str) {
+    int len = strlen(str);
+    while (len > 0 && isspace((unsigned char)str[len - 1])) {
+        str[len - 1] = '\0';
+        len--;
+    }
+}
 
+int isValidSeafood(const char *item) {
+    return (strcasecmp(item, "Tiger Shrimp") == 0 ||
+            strcasecmp(item, "White Shrimp") == 0 ||
+            strcasecmp(item, "King Crab") == 0 ||
+            strcasecmp(item, "Royal Red Shrimp") == 0 ||
+            strcasecmp(item, "Blue Pincer Crab") == 0);
+}
 
 double getPrice(const char *seafoodName){
     if(strcmp(seafoodName, "Tiger Shrimp") == 0){
@@ -91,6 +123,106 @@ double calculatePrice(const Delivery *cust){
     return totalPrice;
 }
 
+int isValidPhone(const char *phone) {
+    if (strlen(phone) == 0) return 0;
+    if (phone[0] != '0') return 0;
+
+    int digitCount = 0;
+    for (int i = 0; phone[i] != '\0'; i++) {
+        if (isdigit((unsigned char)phone[i])) {
+            digitCount++;
+        } else if (phone[i] != '-') {
+            return 0;
+        }
+    }
+    if (digitCount < 9 || digitCount > 11) return 0;
+    return 1;
+}
+
+void writeOrderToFile(FILE *fp, const Delivery *cust){
+    fprintf(fp, "Customer: %s\n", cust->name);
+    fprintf(fp, "Phone Number : %s\n", cust->phoneNum);
+    fprintf(fp, "Address : %s\n", cust->address);
+    fprintf(fp, "Delivery Type : %s\n", cust->deliveryType);
+    for(int i = 0; i < cust->itemCount; i++){
+        fprintf(fp, "%s : %d\n", cust->items[i].seafoodName, cust->items[i].quantity);
+    }
+    fprintf(fp, "Total Price: RM%.2f\n", calculatePrice(cust));
+    fprintf(fp, "\n");
+}
+
+void generateReport(Delivery customer[], int count) {
+    FILE *fp = fopen("report.txt", "w");
+    if (!fp) {
+        printf("[File Error] Could not open report.txt for writing. report not generated.\n");
+        return;
+    }
+
+    time_t now = time(NULL);
+    struct tm *t = localtime(&now);
+    char dateStr[50];
+    strftime(dateStr, sizeof(dateStr), "%Y-%m-%d", t);
+
+    fprintf(fp, "===== DAILY SEAFOOD ORDER REPORT =====\n");
+    fprintf(fp, "Generated on: %s\n\n", dateStr);
+
+    double totalRevenue = 0;
+    int rushCount = 0, regularCount = 0;
+
+    char seafoodTypes[MAX_ITEMS][100];
+    int seafoodTotals[MAX_ITEMS];
+    int seafoodTypeCount = 0;
+
+    for (int i = 0; i < count; i++) {
+        totalRevenue += calculatePrice(&customer[i]);
+
+        if (strcasecmp(customer[i].deliveryType, "Rush") == 0) {
+            rushCount++;
+        } else if (strcasecmp(customer[i].deliveryType, "Regular") == 0) {
+            regularCount++;
+        }
+
+        for (int j = 0; j < customer[i].itemCount; j++) {
+            int found = 0;
+            for (int k = 0; k < seafoodTypeCount; k++) {
+                if (strcasecmp(seafoodTypes[k], customer[i].items[j].seafoodName) == 0) {
+                    seafoodTotals[k] += customer[i].items[j].quantity;
+                    found = 1;
+                    break;
+                }
+            }
+            if (!found) {
+                strcpy(seafoodTypes[seafoodTypeCount], customer[i].items[j].seafoodName);
+                seafoodTotals[seafoodTypeCount] = customer[i].items[j].quantity;
+                seafoodTypeCount++;
+            }
+        }
+    }
+
+    fprintf(fp, "--- SUMMARY ---\n");
+    fprintf(fp, "Total Orders: %d\n", count);
+    fprintf(fp, "Total Revenue: RM%.2f\n\n", totalRevenue);
+
+    fprintf(fp, "--- DELIVERY TYPE BREAKDOWN ---\n");
+    fprintf(fp, "Rush Orders: %d\n", rushCount);
+    fprintf(fp, "Regular Orders: %d\n\n", regularCount);
+
+    fprintf(fp, "--- SEAFOOD SALES SUMMARY ---\n");
+    for (int i = 0; i < seafoodTypeCount; i++) {
+        fprintf(fp, "%s : %d unit(s) sold\n", seafoodTypes[i], seafoodTotals[i]);
+    }
+    fprintf(fp, "\n");
+
+    fprintf(fp, "--- DETAILED ORDER LIST ---\n");
+    for (int i = 0; i < count; i++) {
+        fprintf(fp, "[%d] ", i);
+        writeOrderToFile(fp, &customer[i]);
+    }
+
+    fclose(fp);
+    printf("[Success] report.txt generated.\n");
+}
+
 void printOrder(const Delivery *cust){
     printf("Customer: %s\n", cust->name);
     printf("Phone Number : %s\n", cust->phoneNum);
@@ -98,14 +230,17 @@ void printOrder(const Delivery *cust){
     printf("Delivery Type : %s\n", cust->deliveryType);
 
     for(int i = 0; i < cust->itemCount;i++){
-        printf("- %s \t -%d\n", cust->items[i].seafoodName,cust->items[i].quantity);
+        printf("%s : %d\n", cust->items[i].seafoodName,cust->items[i].quantity);
     }
-    printf("RM%.2f\n", calculatePrice(cust));
+    printf("Total Price:RM%.2f\n", calculatePrice(cust));
     printf("\n");
 }
 void saveToFile(Delivery customer[], int count) {
     FILE *fp = fopen("input.txt", "w");
-    if (!fp) return;
+    if (!fp){                                                          
+    printf("[File Error] Could not open input.txt for writing. Changes not saved.\n");
+    return;                                                            
+    }
     for (int i = 0; i < count; i++) {
         fprintf(fp, "%s,%s,%s,%s", customer[i].name, customer[i].phoneNum, customer[i].address, customer[i].deliveryType);
         for (int j = 0; j < customer[i].itemCount; j++) {
@@ -116,11 +251,6 @@ void saveToFile(Delivery customer[], int count) {
     fclose(fp);
 }
 
-// =========================================================================
-// 3) BASIC CRUD OPERATIONS (Rubric 3a, 3b, 3c)
-// =========================================================================
-
-// Option 2: Add data (Rubric 3a)
 void handleAddData(Delivery customer[], int *customerCount) {
     char buffer[256];
     if (*customerCount >= MAX_CUSTOMERS) return;
@@ -128,12 +258,21 @@ void handleAddData(Delivery customer[], int *customerCount) {
     Delivery newCust;
     newCust.itemCount = 0;
 
-    while (1) {
+while (1) {
         printf("Enter Customer Name: ");
         fgets(newCust.name, sizeof(newCust.name), stdin);
         newCust.name[strcspn(newCust.name, "\n")] = 0;
         trimString(newCust.name);
-        if (strlen(newCust.name) > 0) break;
+
+        if (strlen(newCust.name) == 0) {
+            printf("[Input Error] Name field cannot be left blank.\n");
+            continue;
+        }
+        if (!isValidName(newCust.name)) {                                                        
+            printf("[Input Error] Name can only contain letters and spaces (no numbers or symbols).\n"); 
+            continue;                                                                                
+        }
+        break;
     }
 
     while (1) {
@@ -141,7 +280,16 @@ void handleAddData(Delivery customer[], int *customerCount) {
         fgets(newCust.phoneNum, sizeof(newCust.phoneNum), stdin);
         newCust.phoneNum[strcspn(newCust.phoneNum, "\n")] = 0;
         trimString(newCust.phoneNum);
-        if (strlen(newCust.phoneNum) > 0) break;
+
+        if (strlen(newCust.phoneNum) == 0) {
+            printf("[Input Error] Phone number field cannot be left blank.\n");
+            continue;
+        }
+        if (!isValidPhone(newCust.phoneNum)) {                                                                       
+            printf("[Input Error] Phone number must start with 0, contain only digits and '-', with 9-11 digits total.\n"); 
+            continue;                                                                                               
+        }
+        break;
     }
 
     while (1) {
@@ -207,7 +355,7 @@ void handleAddData(Delivery customer[], int *customerCount) {
     printf("[Success] Order added successfully.\n");
 }
 
-// Option 3 & 4: Search, Update, and Delete operations (Rubric 3b, 3c)
+
 void handleSearchUpdate(Delivery customer[], int customerCount) {
     char buffer[256];
     if (customerCount == 0) return;
@@ -226,7 +374,7 @@ void handleSearchUpdate(Delivery customer[], int customerCount) {
 
         for (int i = 0; i < customerCount; i++) {
             if (strcasecmp(customer[i].name, searchKey) == 0) {
-                printOrder(&customer[i], i);
+                printOrder(&customer[i]);
             }
         }
     } else if (subChoice == 2) {
@@ -292,6 +440,8 @@ int main(void) {
             if (inputFile(line, &tempCust)) {
                 customer[customerCount] = tempCust;
                 customerCount++;
+            } else {
+                printf("[File Warning] Skipped a malformed line in input.txt.\n");   
             }
         }
         fclose(fp);
@@ -310,7 +460,15 @@ int main(void) {
         printf("Enter option (1-5): ");
         
         if (!fgets(menuBuffer, sizeof(menuBuffer), stdin)) break;
-        if (sscanf(menuBuffer, "%d", &choice) != 1) continue;
+        if (sscanf(menuBuffer, "%d", &choice) != 1) {
+            printf("[Error] Please enter a valid menu number between 1 and 5.\n");  
+            choice = 0;
+            continue;
+        }
+        if (choice < 1 || choice > 5) {                                             
+            printf("[Error] Menu choice must be strictly from 1 to 5.\n");
+            continue;
+        }
 
         switch (choice) {
             case 1:
@@ -319,7 +477,7 @@ int main(void) {
                     printf("No records found.\n");
                 } else {
                     for (int i = 0; i < customerCount; i++) {
-                        printOrder(&customer[i], i);
+                        printOrder(&customer[i]);
                     }
                 }
                 break;
@@ -334,6 +492,7 @@ int main(void) {
                 break;
             case 5:
                 saveToFile(customer, customerCount);
+                generateReport(customer, customerCount);
                 printf("\nChanges persisted into input.txt. Goodbye!\n");
                 break;
         }
