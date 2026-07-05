@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 //STARTING
-
+//========INITIALIZATION
 typedef struct{
     char seafoodName[100];
     int quantity;
@@ -18,6 +18,8 @@ typedef struct{
     int itemCount;
 }Delivery;
 
+
+//========READ FILE AND INSERT INSERT STRUCT
 int inputFile(char *line, Delivery *cust){
     char *token;
 
@@ -46,6 +48,9 @@ int inputFile(char *line, Delivery *cust){
 
     return 1;
 }
+
+
+//========CALCULATION
 
 double getDeliveryFee(const Delivery *cust){
     double deliveryFee = 0;
@@ -91,6 +96,8 @@ double calculatePrice(const Delivery *cust){
     return totalPrice;
 }
 
+
+//========DISPLAY AND PRINTING
 void printOrder(const Delivery *cust){
     printf("Customer: %s\n", cust->name);
     printf("Phone Number : %s\n", cust->phoneNum);
@@ -112,6 +119,8 @@ int main(void) {
         return 1;
     }
 
+    int count = 0;
+
     char line[1024];
 
     int valid = 1;
@@ -119,12 +128,32 @@ int main(void) {
         Delivery cust;
 
         if(inputFile(line, &cust)){
-            printOrder(&cust);
+            count++;
         }else{
             printf("Incomplete!");
         }
 
     }
     fclose(fp);
+
+    int choice;
+    do{
+        printf("1. Show All Orders\n");
+        printf("2. Insert Data. \n");
+        printf("3. Search and Update Data. \n");
+        printf("4. Delete Data. \n");
+        printf("5. Exit \n");
+        printf("Choice : ");
+        scanf(" %d", &choice);
+        printf("\n");
+
+        switch(choice){
+            case 5 : 
+                printf("Fuck Off"); 
+                break;
+            default:
+                printf("Invalid Choice.");
+        }
+    }while(choice != 5);
     return 0;
 }
