@@ -49,6 +49,26 @@ int inputFile(char *line, Delivery *cust){
     return 1;
 }
 
+int loadOrders(const char *filename, Delivery orders[], int *count){
+    FILE *fp = fopen(filename, "r");
+    if(!fp){
+        perror("Error Opening Files");
+        return 0;
+    }
+
+    char line[1024];
+    *count = 0;
+
+    while(fgets(line, sizeof(line), fp)){
+        if(inputFile(line, &orders[*count])){
+            (*count)++;
+        }
+    }
+
+    fclose(fp);
+    return 1;
+}
+
 
 //========CALCULATION
 
@@ -111,30 +131,53 @@ void printOrder(const Delivery *cust){
     printf("\n");
 }
 
+void printAllOrder(const Delivery cust[], int count){
+    for(int i = 0; i < count; i++){
+        printf("[%d]\n", i+1);
+        printOrder(cust);
+    }
+}
+
+//========ADD DATA
+
+void addData(Delivery orders[], int *count){
+    Delivery newOrder;
+    printf("Enter Name : ");
+    scanf(" %[^\n]", newOrder.name);
+    printf("Enter Phone Number : ");
+    scanf(" %[^\n]", newOrder.phoneNum);
+    printf("Enter Address : ");
+    scanf(" %[^\n]", newOrder.address);
+    printf("Enter Delivery Type (Rush/Regular) : ");
+    scanf(" %[^\n]", newOrder.deliveryType);
+
+    newOrder.itemCount = 0;
+    printf("How many Seafood Items? : ");
+    int n;
+    scanf("%d", &n);
+
+    for(int i = 0; i < n; i++){
+        printf("Seafood Name %d : ", i + 1);
+        scanf(" %[^\n]", newOrder.items[i].seafoodName);
+        printf("Quantity %d : ", i+1);
+        scanf(" %d", &newOrder.items[i].quantity);
+        newOrder.itemCount++;
+    }
+
+    orders[*count] = newOrder;
+    (*count)++;
+
+    printf("\nOrder added Successfully \n\n");
+}
+
+//========ADD DATA
+
 
 int main(void) {
-    FILE *fp = fopen("input.txt", "r");
-    if(!fp){
-        perror("Error Opening Files");
-        return 1;
-    }
-
+    Delivery cust[100];
     int count = 0;
 
-    char line[1024];
-
-    int valid = 1;
-    while(fgets(line, sizeof(line), fp)){
-        Delivery cust;
-
-        if(inputFile(line, &cust)){
-            count++;
-        }else{
-            printf("Incomplete!");
-        }
-
-    }
-    fclose(fp);
+    loadOrders("input.txt", cust, &count);
 
     int choice;
     do{
@@ -148,6 +191,11 @@ int main(void) {
         printf("\n");
 
         switch(choice){
+            case 1 :
+                printAllOrder(cust, count);
+                break;
+            case 2 :
+                addData(cust, &count);
             case 5 : 
                 printf("Fuck Off"); 
                 break;
