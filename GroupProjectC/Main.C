@@ -205,6 +205,27 @@ void searchAndUpdate(Delivery cust[], int count){
     printOrder(&cust[index]);
 }
 
+//========DELETE DATA
+
+void deleteData(Delivery cust[], int *count){
+    char name[100];
+    printf("Enter Name to Delete : ");
+    scanf(" %[\n]", name);
+
+    int index = findbyName(cust, *count, name);
+    if(index == -1){
+        printf("Customer Not Found!\n\n");
+        return;
+    }
+
+    for(int i = index; i < *count - 1; i++){
+        cust[i] = cust[i+1];
+    }
+
+    (*count)--;
+    printf("Customer Deleted!\n\n");
+}
+
 int main(void) {
     Delivery cust[100];
     int count = 0;
@@ -233,7 +254,8 @@ int main(void) {
                 searchAndUpdate(cust, count);
                 break;
             case 4: 
-            
+                deleteData(cust, &count);
+                break;
             case 5 : 
                 printf("Fuck Off"); 
                 break;
