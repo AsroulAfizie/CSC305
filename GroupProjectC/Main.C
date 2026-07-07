@@ -725,7 +725,7 @@ int main(void) {
             case 5:
                 saveToFile(customer, customerCount);
                 generateReport(customer, customerCount);
-                printf("\nChanges persisted into input.txt. Goodbye!\n");
+                printf("\nChanges persisted into report.txt. Goodbye!\n");
                 break;
         }
     }
